@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import axios from "axios";
 
 const firebaseConfig = {
@@ -30,6 +30,20 @@ api.interceptors.request.use(async (config) => {
 
 export const askQuestion = async (question, subject, history) => {
   const res = await api.post("/api/ask", { question, subject, history });
+  
+  // Save chat to Firestore
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      await addDoc(collection(db, "chats"), {
+        user_id: user.uid,
+        subject,
+        messages: [...history, { role: "user", content: question }, { role: "assistant", content: res.data.answer }],
+        created_at: serverTimestamp(),
+      });
+    } catch (e) { console.log("Chat save error:", e); }
+  }
+  
   return res.data;
 };
 
