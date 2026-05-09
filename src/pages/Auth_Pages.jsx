@@ -102,7 +102,7 @@ export function Login() {
             ))}
           </div>
         </div>
-        <p className="text-blue-300 text-sm">Virtual University of Pakistan — BSCS</p>
+        <p className="text-blue-300 text-sm">Virtual University of Pakistan — Developed By Kashan — BSCS</p>
       </div>
 
       {/* Right Panel - Login Form */}
