@@ -51,10 +51,30 @@ export function ChatPage() {
   const [input, setInput] = useState("");
   const [subject, setSubject] = useState("Data Structures");
   const [loading, setLoading] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
   const bottomRef = useRef(null);
+  const [searchParams] = useState(() => new URLSearchParams(window.location.search));
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
+  // Load existing chat from Firestore
+  useEffect(() => {
+    const chatId = searchParams.get("id");
+    if (!chatId) return;
+    setChatLoading(true);
+    import("firebase/firestore").then(({ doc, getDoc }) => {
+      import("../services/firebase_and_api").then(({ db }) => {
+        getDoc(doc(db, "chats", chatId)).then(snap => {
+          if (snap.exists()) {
+            const data = snap.data();
+            setMessages(data.messages || []);
+            setSubject(data.subject || "Data Structures");
+          }
+          setChatLoading(false);
+        });
+      });
+    });
+  }, []);
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
     const userMessage = { role: "user", content: input };
