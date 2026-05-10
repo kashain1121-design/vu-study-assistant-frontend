@@ -46,11 +46,13 @@ export const askQuestion = async (question, subject, history) => {
       ];
 
       if (currentChatId) {
+        // Update existing chat
         await updateDoc(doc(db, "chats", currentChatId), {
           messages: newMessages,
           updated_at: serverTimestamp(),
         });
       } else {
+        // Create new chat
         const docRef = await addDoc(collection(db, "chats"), {
           user_id: user.uid,
           subject,
