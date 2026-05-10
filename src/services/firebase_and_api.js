@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { getFirestore, collection, addDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import axios from "axios";
 
 const firebaseConfig = {
@@ -37,7 +37,7 @@ export const askQuestion = async (question, subject, history) => {
   const user = auth.currentUser;
   if (user) {
     try {
-      const { collection, addDoc, doc, updateDoc, serverTimestamp } = await import("firebase/firestore");
+      
       
       const newMessages = [
         ...history,
