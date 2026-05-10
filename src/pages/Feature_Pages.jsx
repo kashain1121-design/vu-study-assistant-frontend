@@ -63,12 +63,9 @@ export function ChatPage() {
   useEffect(() => {
     const chatId = new URLSearchParams(window.location.search).get("id");
     if (!chatId) {
-      resetChatSession(); // Naya chat session shuru
+      resetChatSession();
       return;
     }
-    // ... baaki code same rahega
-    }, []);
-    
     const load = async () => {
       try {
         const { db } = await import("../services/firebase_and_api");
@@ -80,9 +77,9 @@ export function ChatPage() {
           setSubject(data.subject || "Data Structures");
         }
       } catch(e) { console.log(e); }
-      
     };
     load();
+  }, []);
       
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
