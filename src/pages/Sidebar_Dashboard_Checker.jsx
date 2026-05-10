@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation  } from "react-router-dom";
 import { auth, db } from "../services/firebase_and_api";
 import { signOut } from "firebase/auth";
 import { collection, query, where, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
@@ -141,7 +141,7 @@ export function Sidebar({ user }) {
 
 export function Dashboard({ user }) {
   const [recentChats, setRecentChats] = useState([]);
-  const navigate = useNavigate();
+  
 
   useEffect(() => {
     if (!user) return;

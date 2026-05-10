@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+
 import { askQuestion, generateQuiz, generateAssignment, simplifyText, generateStudyPlan, analyzePastPaper } from "../services/firebase_and_api";
 
 const SUBJECTS = ["Data Structures", "OOP", "DBMS", "Operating Systems", "Software Engineering", "Computer Networks"];
@@ -52,9 +52,9 @@ export function ChatPage() {
   const [input, setInput] = useState("");
   const [subject, setSubject] = useState("Data Structures");
   const [loading, setLoading] = useState(false);
-  const [chatLoading, setChatLoading] = useState(false);
+ 
   const bottomRef = useRef(null);
-  const [searchParams] = useSearchParams();
+  
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
@@ -62,7 +62,7 @@ export function ChatPage() {
   useEffect(() => {
     const chatId = new URLSearchParams(window.location.search).get("id");
     if (!chatId) return;
-    setChatLoading(true);
+    
     const load = async () => {
       try {
         const { db } = await import("../services/firebase_and_api");
@@ -74,7 +74,7 @@ export function ChatPage() {
           setSubject(data.subject || "Data Structures");
         }
       } catch(e) { console.log(e); }
-      setChatLoading(false);
+      
     };
     load();
   }, []);
