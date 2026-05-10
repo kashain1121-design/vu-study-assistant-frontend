@@ -83,7 +83,7 @@ export function ChatPage() {
       
     };
     load();
-  }, []);
+      
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
     const userMessage = { role: "user", content: input };
