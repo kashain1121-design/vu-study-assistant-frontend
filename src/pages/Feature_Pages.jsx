@@ -60,21 +60,23 @@ export function ChatPage() {
 
   // Load existing chat from Firestore
   useEffect(() => {
-    const chatId = searchParams.get("id");
+    const chatId = new URLSearchParams(window.location.search).get("id");
     if (!chatId) return;
     setChatLoading(true);
-    import("firebase/firestore").then(({ doc, getDoc }) => {
-      import("../services/firebase_and_api").then(({ db }) => {
-        getDoc(doc(db, "chats", chatId)).then(snap => {
-          if (snap.exists()) {
-            const data = snap.data();
-            setMessages(data.messages || []);
-            setSubject(data.subject || "Data Structures");
-          }
-          setChatLoading(false);
-        });
-      });
-    });
+    const load = async () => {
+      try {
+        const { db } = await import("../services/firebase_and_api");
+        const { doc, getDoc } = await import("firebase/firestore");
+        const snap = await getDoc(doc(db, "chats", chatId));
+        if (snap.exists()) {
+          const data = snap.data();
+          setMessages(data.messages || []);
+          setSubject(data.subject || "Data Structures");
+        }
+      } catch(e) { console.log(e); }
+      setChatLoading(false);
+    };
+    load();
   }, []);
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
