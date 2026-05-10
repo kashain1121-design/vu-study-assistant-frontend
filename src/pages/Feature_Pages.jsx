@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 
 import { askQuestion, generateQuiz, generateAssignment, simplifyText, generateStudyPlan, analyzePastPaper } from "../services/firebase_and_api";
 
@@ -132,9 +133,10 @@ export function ChatPage() {
               msg.role === "user"
                 ? "bg-blue-600 text-white rounded-br-sm"
                 : "bg-white border border-gray-200 text-gray-800 rounded-bl-sm shadow-sm"
-            }`}>
-              {msg.content}
-            </div>
+            }`}>{msg.role === "assistant" ? (
+    <ReactMarkdown className="prose prose-sm max-w-none">{msg.content}</ReactMarkdown>
+  ) : msg.content}
+</div>
           </div>
         ))}
         {loading && (
