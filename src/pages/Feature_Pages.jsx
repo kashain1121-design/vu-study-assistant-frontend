@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 
-import { askQuestion, generateQuiz, generateAssignment, simplifyText, generateStudyPlan, analyzePastPaper } from "../services/firebase_and_api";
+import { askQuestion, generateQuiz, generateAssignment, simplifyText, generateStudyPlan, analyzePastPaper, resetChatSession } from "../services/firebase_and_api";
 
 const SUBJECTS = ["Data Structures", "OOP", "DBMS", "Operating Systems", "Software Engineering", "Computer Networks"];
 
@@ -62,7 +62,12 @@ export function ChatPage() {
   // Load existing chat from Firestore
   useEffect(() => {
     const chatId = new URLSearchParams(window.location.search).get("id");
-    if (!chatId) return;
+    if (!chatId) {
+      resetChatSession(); // Naya chat session shuru
+      return;
+    }
+    // ... baaki code same rahega
+    }, []);
     
     const load = async () => {
       try {
