@@ -172,7 +172,7 @@ export function ChatPage() {
       </div>
 
       {/* Input */}
-      <div className="px-4 md:px-6 py-4 border-t border-gray-100 bg-white">
+      <div className="px-4 md:px-6 py-4 border-t border-gray-100 bg-white sticky bottom-0">
         <div className="flex gap-2 items-end">
           <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown}
             placeholder="Type your question... (Enter to send)"
