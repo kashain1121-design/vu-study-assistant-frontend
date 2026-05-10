@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { askQuestion, generateQuiz, generateAssignment, simplifyText, generateStudyPlan, analyzePastPaper } from "../services/firebase_and_api";
 
 const SUBJECTS = ["Data Structures", "OOP", "DBMS", "Operating Systems", "Software Engineering", "Computer Networks"];
@@ -53,7 +54,7 @@ export function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
   const bottomRef = useRef(null);
-  const [searchParams] = useState(() => new URLSearchParams(window.location.search));
+  const [searchParams] = useSearchParams();
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
