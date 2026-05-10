@@ -141,6 +141,7 @@ export function Sidebar({ user }) {
 
 export function Dashboard({ user }) {
   const [recentChats, setRecentChats] = useState([]);
+const [chatsLoading, setChatsLoading] = useState(true);
   
 
   useEffect(() => {
@@ -156,6 +157,7 @@ export function Dashboard({ user }) {
         const snapshot = await getDocs(chatsQ);
         setRecentChats(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
       } catch (e) { console.log("Could not load chats", e); }
+      finally { setChatsLoading(false); }
     };
     loadData();
   }, [user]);
@@ -228,7 +230,23 @@ export function Dashboard({ user }) {
               New chat
             </Link>
           </div>
-          {recentChats.length === 0 ? (
+          {chatsLoading ? (
+  <div className="space-y-2">
+    {[1,2,3].map(i => (
+      <div
+        key={i}
+        className="flex items-center gap-3 p-2.5 rounded-lg animate-pulse"
+      >
+        <div className="w-8 h-8 bg-gray-200 rounded-lg flex-shrink-0" />
+
+        <div className="flex-1">
+          <div className="h-3 bg-gray-200 rounded w-3/4 mb-1.5" />
+          <div className="h-2 bg-gray-100 rounded w-1/2" />
+        </div>
+      </div>
+    ))}
+  </div>
+) : recentChats.length === 0 ? (
             <div className="text-center py-6">
               <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
