@@ -90,7 +90,7 @@ export function ChatPage() {
       const data = await askQuestion(input, subject, messages);
       setMessages([...newMessages, { role: "assistant", content: data.answer }]);
     } catch {
-      setMessages([...newMessages, { role: "assistant", content: "⚠️ Unable to get a response. This may be due to API rate limits. Please wait a moment and try again." }]);
+      setMessages([...newMessages, { role: "assistant", content: " Unable to get a response. This may be due to API rate limits. Please wait a moment and try again." }]);
     }
     setLoading(false);
   };
