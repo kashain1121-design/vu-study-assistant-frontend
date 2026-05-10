@@ -28,24 +28,45 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
+// Chat session management
+let currentChatId = null;
+
 export const askQuestion = async (question, subject, history) => {
   const res = await api.post("/api/ask", { question, subject, history });
   
-  // Save chat to Firestore
   const user = auth.currentUser;
   if (user) {
     try {
-      await addDoc(collection(db, "chats"), {
-        user_id: user.uid,
-        subject,
-        messages: [...history, { role: "user", content: question }, { role: "assistant", content: res.data.answer }],
-        created_at: serverTimestamp(),
-      });
+      const { collection, addDoc, doc, updateDoc, serverTimestamp } = await import("firebase/firestore");
+      
+      const newMessages = [
+        ...history,
+        { role: "user", content: question },
+        { role: "assistant", content: res.data.answer }
+      ];
+
+      if (currentChatId) {
+        await updateDoc(doc(db, "chats", currentChatId), {
+          messages: newMessages,
+          updated_at: serverTimestamp(),
+        });
+      } else {
+        const docRef = await addDoc(collection(db, "chats"), {
+          user_id: user.uid,
+          subject,
+          messages: newMessages,
+          created_at: serverTimestamp(),
+          updated_at: serverTimestamp(),
+        });
+        currentChatId = docRef.id;
+      }
     } catch (e) { console.log("Chat save error:", e); }
   }
   
   return res.data;
 };
+
+export const resetChatSession = () => { currentChatId = null; };
 
 export const analyzePastPaper = async (file, subject) => {
   const formData = new FormData();
