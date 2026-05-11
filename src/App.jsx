@@ -2,7 +2,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { useState, useEffect } from "react";
 import { auth } from "./services/firebase_and_api";
 import { onAuthStateChanged } from "firebase/auth";
-
+import ErrorBoundary from "./ErrorBoundary";
+return (
+  <ErrorBoundary>
+    <Router>
+      ...
+    </Router>
+  </ErrorBoundary>
+);
 import { Login, Register } from "./pages/Auth_Pages";
 import { ChatPage, PastPaperPage, QuizPage, SimplifierPage, AssignmentPage, PlannerPage } from "./pages/Feature_Pages";
 import { Sidebar, Dashboard, CheckerPage } from "./pages/Sidebar_Dashboard_Checker";
