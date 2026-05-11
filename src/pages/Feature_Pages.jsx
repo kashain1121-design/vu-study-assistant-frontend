@@ -210,7 +210,7 @@ export function QuizPage() {
     try {
       const data = await generateQuiz(topic, subject, count, qType);
       setQuestions(data.questions);
-    } catch { setError("Failed to generate quiz. Please try again."); }
+    } catch { setError("Service temporarily unavailable. Please check your connection and try again in a moment."); }
     setLoading(false);
   };
 
@@ -345,7 +345,7 @@ export function AssignmentPage() {
     try {
       const data = await generateAssignment(form.subject, form.topic, form.type, form.requirements);
       setDraft(data.draft);
-    } catch { setError("Failed to generate. Please try again."); }
+    } catch { setError("Service temporarily unavailable. Please check your connection and try again in a moment."); }
     setLoading(false);
   };
 
@@ -566,7 +566,7 @@ export function SimplifierPage() {
     try {
       const data = await simplifyText(text, inUrdu);
       setResult(data.simplified);
-    } catch { setResult("Error. Please try again."); }
+    } catch { setResult("Unable to simplify text. Please try again in a moment."); }
     setLoading(false);
   };
 
