@@ -16,6 +16,7 @@ function ProtectedRoute({ user, children }) {
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -44,8 +45,8 @@ function App() {
         <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <Register />} />
         <Route path="/*" element={
           <ProtectedRoute user={user}>
-            <div className="flex h-screen bg-gray-50">
-              <Sidebar user={user} />
+            <div className={`flex h-screen ${darkMode ? "bg-gray-900" : "bg-gray-50"}`}>
+            <Sidebar user={user} darkMode={darkMode} setDarkMode={setDarkMode} />
               <main className="flex-1 overflow-y-auto pt-14 lg:pt-0">
                 <Routes>
                   <Route path="/dashboard"   element={<Dashboard user={user} />} />

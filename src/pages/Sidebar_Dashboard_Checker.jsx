@@ -24,7 +24,7 @@ function NavIcon({ d }) {
   );
 }
 
-export function Sidebar({ user }) {
+export function Sidebar({ user, darkMode, setDarkMode }) {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -44,12 +44,23 @@ export function Sidebar({ user }) {
             <p className="text-xs text-blue-500 font-medium">Pro</p>
           </div>
         )}
-        <button onClick={() => setCollapsed(!collapsed)}
-          className="hidden lg:flex ml-auto p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={collapsed ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"} />
-          </svg>
-        </button>
+        <button
+  onClick={() => setDarkMode(!darkMode)}
+  className={`w-full flex items-center justify-center gap-2 text-sm py-2 px-3 rounded-lg transition-colors font-medium mb-2 ${
+    darkMode ? "bg-gray-700 text-gray-200 hover:bg-gray-600" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+  }`}
+>
+  {darkMode ? (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  ) : (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+    </svg>
+  )}
+  {!collapsed && <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>}
+</button>
       </div>
 
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
