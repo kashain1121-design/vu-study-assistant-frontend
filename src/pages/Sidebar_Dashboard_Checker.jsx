@@ -26,7 +26,7 @@ function NavIcon({ d }) {
 
 export function Sidebar({ user, darkMode, setDarkMode }) {
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(false); // eslint-disable-line
   const [mobileOpen, setMobileOpen] = useState(false);
   const handleLogout = async () => { await signOut(auth); };
 
