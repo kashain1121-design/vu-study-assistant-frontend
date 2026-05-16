@@ -153,8 +153,9 @@ export function Sidebar({ user }) {
 }
 
 export function Dashboard({ user }) {
+  const { darkMode } = useTheme();
   const [recentChats, setRecentChats] = useState([]);
-const [chatsLoading, setChatsLoading] = useState(true);
+  const [chatsLoading, setChatsLoading] = useState(true);
   
 
   useEffect(() => {
@@ -204,9 +205,9 @@ const [chatsLoading, setChatsLoading] = useState(true);
   };
 
   return (
-    <div className="p-4 md:p-6 max-w-5xl mx-auto">
+    <div className={`p-4 md:p-6 max-w-5xl mx-auto`}>
       <div className="mb-6">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Welcome back, {user?.displayName?.split(" ")[0]}</h1>
+        <h1 className={`text-xl md:text-2xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>Welcome back, {user?.displayName?.split(" ")[0]}</h1>
         <p className="text-gray-500 text-sm mt-1">What would you like to study today?</p>
       </div>
 
@@ -224,7 +225,7 @@ const [chatsLoading, setChatsLoading] = useState(true);
 
       <div className="grid grid-cols-3 gap-3 mb-6">
         {[{ label: "Modules", value: "8" }, { label: "AI Powered", value: "Yes" }, { label: "Free", value: "100%" }].map(({ label, value }) => (
-          <div key={label} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+          <div key={label} className={`rounded-xl border p-4 text-center ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
             <p className="text-xl font-bold text-blue-600">{value}</p>
             <p className="text-xs text-gray-500 mt-0.5">{label}</p>
           </div>
@@ -233,7 +234,7 @@ const [chatsLoading, setChatsLoading] = useState(true);
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Recent Chats */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className={`rounded-xl border p-5 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-gray-800 text-sm">Recent Chats</h2>
             <Link to="/chat" className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
@@ -320,6 +321,7 @@ const [chatsLoading, setChatsLoading] = useState(true);
 }
 
 export function CheckerPage() {
+  const { darkMode } = useTheme();
   const [answer, setAnswer] = useState("");
   const [subject, setSubject] = useState("DBMS");
   const [topic, setTopic] = useState("");
@@ -347,8 +349,8 @@ export function CheckerPage() {
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Assignment Checker</h1>
-        <p className="text-gray-500 text-sm mt-1">Get AI feedback on your answer or code</p>
+        <h1 className={`text-xl md:text-2xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>Assignment Checker</h1>
+        <p className={`text-sm mt-1 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>Get AI feedback on your answer or code</p>
       </div>
       <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4 mb-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
