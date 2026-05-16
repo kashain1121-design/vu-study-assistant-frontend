@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation  } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useTheme } from "../App";
 import { auth, db } from "../services/firebase_and_api";
 import { signOut } from "firebase/auth";
 import { collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
@@ -24,7 +25,8 @@ function NavIcon({ d }) {
   );
 }
 
-export function Sidebar({ user, darkMode, setDarkMode }) {
+export function Sidebar({ user }) {
+  const { darkMode, setDarkMode } = useTheme();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false); // eslint-disable-line
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -69,7 +71,7 @@ export function Sidebar({ user, darkMode, setDarkMode }) {
           return (
             <Link key={item.path} to={item.path} title={collapsed ? item.label : ""}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group ${
-                active ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                active ? "bg-blue-600 text-white shadow-sm" : `${darkMode ? "text-gray-300 hover:bg-gray-700 hover:text-white" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`
               } ${collapsed ? "justify-center" : ""}`}>
               <span className={`flex-shrink-0 ${active ? "text-white" : "text-gray-400 group-hover:text-gray-600"}`}>
                 <NavIcon d={item.icon} />
@@ -120,7 +122,7 @@ export function Sidebar({ user, darkMode, setDarkMode }) {
 
   return (
     <>
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+      <div className={`lg:hidden fixed top-0 left-0 right-0 z-40 border-b px-4 py-3 flex items-center justify-between ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-xs">VU</span>
@@ -139,11 +141,11 @@ export function Sidebar({ user, darkMode, setDarkMode }) {
         <div className="lg:hidden fixed inset-0 z-30 bg-black bg-opacity-40" onClick={() => setMobileOpen(false)} />
       )}
 
-      <div className={`lg:hidden fixed top-0 left-0 z-40 h-full w-64 bg-white shadow-xl transform transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+<div className={`lg:hidden fixed top-0 left-0 z-40 h-full w-64 shadow-xl transform transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"} ${darkMode ? "bg-gray-800" : "bg-white"}`}>
         <SidebarContent />
       </div>
 
-      <div className={`hidden lg:flex flex-col h-full bg-white border-r border-gray-200 transition-all duration-300 ${collapsed ? "w-16" : "w-60"}`}>
+      <div className={`hidden lg:flex flex-col h-full border-r transition-all duration-300 ${collapsed ? "w-16" : "w-60"} ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
         <SidebarContent />
       </div>
     </>
