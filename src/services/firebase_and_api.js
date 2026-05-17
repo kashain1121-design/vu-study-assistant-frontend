@@ -2,7 +2,24 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore, collection, addDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import axios from "axios";
-
+// Helper function: File ko Base64 mein convert karne ke liye
+const fileToGenerativePart = async (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      // Data URL format (data:image/png;base64,xxxx) se sirf base64 string alag karna
+      const base64Data = reader.result.split(',')[1];
+      resolve({
+        inlineData: {
+          data: base64Data,
+          mimeType: file.type // e.g., 'application/pdf' ya 'image/jpeg'
+        }
+      });
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
@@ -31,42 +48,51 @@ api.interceptors.request.use(async (config) => {
 // Chat session management
 let currentChatId = null;
 
-export const askQuestion = async (question, subject, history) => {
-  const res = await api.post("/api/ask", { question, subject, history });
-  
-  const user = auth.currentUser;
-  if (user) {
-    try {
-      
-      
-      const newMessages = [
-        ...history,
-        { role: "user", content: question },
-        { role: "assistant", content: res.data.answer }
-      ];
+// Updated askQuestion: Ab yeh File (PDF/Image) bhi accept karega
+export async function askQuestion(text, subject, chatHistory, file = null) {
+  try {
+    // 1. Basic text prompt prepare karein
+    let promptText = `You are a helpful AI Tutor for BSCS students. Subject: ${subject}.\n\nUser Question: ${text || "Please analyze the attached file."}`;
+    
+    // 2. Parts array banayein (Gemini API ko array chahiye hota hai agar file ho)
+    let promptParts = [{ text: promptText }];
 
-      if (currentChatId) {
-        // Update existing chat
-        await updateDoc(doc(db, "chats", currentChatId), {
-          messages: newMessages,
-          updated_at: serverTimestamp(),
-        });
-      } else {
-        // Create new chat
-        const docRef = await addDoc(collection(db, "chats"), {
-          user_id: user.uid,
-          subject,
-          messages: newMessages,
-          created_at: serverTimestamp(),
-          updated_at: serverTimestamp(),
-        });
-        currentChatId = docRef.id;
-      }
-    } catch (e) { console.log("Chat save error:", e); }
+    // 3. Agar user ne file attach ki hai, to usay Base64 mein convert karke prompt mein add karein
+    if (file) {
+      const fileData = await fileToGenerativePart(file);
+      promptParts.push(fileData);
+    }
+
+    // 4. Gemini API Call
+    // IMPORTANT: Make sure to use gemini-1.5-flash as it supports files/images
+    const API_KEY = import.meta.env.VITE_GEMINI_API_KEY; // Apna .env variable yahan check kar lena
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+    
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: promptParts }]
+      })
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error?.message || "API Error");
+    }
+
+    const answer = data.candidates[0].content.parts[0].text;
+    
+    // Yahan par aap Firestore mein chat save karne ka logic (agar hai to) rakh sakte hain
+
+    return { answer: answer };
+
+  } catch (error) {
+    console.error("Error in askQuestion:", error);
+    throw error;
   }
-  
-  return res.data;
-};
+}
 
 export const resetChatSession = () => { currentChatId = null; };
 
