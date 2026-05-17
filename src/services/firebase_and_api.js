@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, addDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { getFirestore,  doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import axios from "axios";
 // Helper function: File ko Base64 mein convert karne ke liye
 const fileToGenerativePart = async (file) => {
