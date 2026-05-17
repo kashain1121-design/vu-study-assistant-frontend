@@ -1,25 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore,  doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { getFirestore, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import axios from "axios";
-// Helper function: File ko Base64 mein convert karne ke liye
-const fileToGenerativePart = async (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      // Data URL format (data:image/png;base64,xxxx) se sirf base64 string alag karna
-      const base64Data = reader.result.split(',')[1];
-      resolve({
-        inlineData: {
-          data: base64Data,
-          mimeType: file.type // e.g., 'application/pdf' ya 'image/jpeg'
-        }
-      });
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-};
+
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
@@ -48,46 +31,27 @@ api.interceptors.request.use(async (config) => {
 // Chat session management
 let currentChatId = null;
 
-// Updated askQuestion: Ab yeh File (PDF/Image) bhi accept karega
+// CORRECTED askQuestion: Sends text + file to your Railway Backend
 export async function askQuestion(text, subject, chatHistory, file = null) {
   try {
-    // 1. Basic text prompt prepare karein
-    let promptText = `You are a helpful AI Tutor for BSCS students. Subject: ${subject}.\n\nUser Question: ${text || "Please analyze the attached file."}`;
+    const formData = new FormData();
+    formData.append("text", text || "");
+    formData.append("subject", subject);
     
-    // 2. Parts array banayein (Gemini API ko array chahiye hota hai agar file ho)
-    let promptParts = [{ text: promptText }];
+    // Convert array to string so backend can parse it
+    formData.append("chatHistory", JSON.stringify(chatHistory || []));
 
-    // 3. Agar user ne file attach ki hai, to usay Base64 mein convert karke prompt mein add karein
+    // Agar user ne PDF/Image attach ki hai, toh usay form mein add karein
     if (file) {
-      const fileData = await fileToGenerativePart(file);
-      promptParts.push(fileData);
+      formData.append("file", file);
     }
 
-    // 4. Gemini API Call
-    // IMPORTANT: Make sure to use gemini-1.5-flash as it supports files/images
-    const API_KEY = import.meta.env.VITE_GEMINI_API_KEY; // Apna .env variable yahan check kar lena
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-    
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ role: "user", parts: promptParts }]
-      })
+    // Call your FastAPI Backend (Railway)
+    const res = await api.post("/api/ask", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
 
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.error?.message || "API Error");
-    }
-
-    const answer = data.candidates[0].content.parts[0].text;
-    
-    // Yahan par aap Firestore mein chat save karne ka logic (agar hai to) rakh sakte hain
-
-    return { answer: answer };
-
+    return res.data; // Backend should return { answer: "..." }
   } catch (error) {
     console.error("Error in askQuestion:", error);
     throw error;
