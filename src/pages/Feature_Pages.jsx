@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-
 import { askQuestion, generateQuiz, generateAssignment, simplifyText, generateStudyPlan, analyzePastPaper, resetChatSession } from "../services/firebase_and_api";
+import { useTheme } from "../App";
 
 const SUBJECTS = ["Data Structures", "OOP", "DBMS", "Operating Systems", "Software Engineering", "Computer Networks"];
 
 function Spinner({ color = "border-blue-600" }) {
   return (
-    <svg className={`animate-spin h-4 w-4`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <svg className={`animate-spin h-4 w-4 ${color}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
     </svg>
@@ -15,8 +15,9 @@ function Spinner({ color = "border-blue-600" }) {
 }
 
 function ErrorBox({ message }) {
+  const { darkMode } = useTheme();
   return (
-    <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5">
+    <div className={`flex items-center gap-2 rounded-lg px-3 py-2.5 ${darkMode ? "text-red-400 bg-red-900/20 border border-red-800" : "text-red-600 bg-red-50 border border-red-200"}`}>
       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
@@ -26,22 +27,25 @@ function ErrorBox({ message }) {
 }
 
 function Label({ children }) {
-  return <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{children}</label>;
+  const { darkMode } = useTheme();
+  return <label className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? "text-gray-400" : "text-gray-500"}`}>{children}</label>;
 }
 
 function SelectInput({ value, onChange, name, children }) {
+  const { darkMode } = useTheme();
   return (
     <select value={value} onChange={onChange} name={name}
-      className="w-full mt-1.5 border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
+      className={`w-full mt-1.5 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-gray-50 border-gray-200 text-gray-900"}`}>
       {children}
     </select>
   );
 }
 
 function TextInput({ value, onChange, placeholder, name }) {
+  const { darkMode } = useTheme();
   return (
     <input value={value} onChange={onChange} placeholder={placeholder} name={name}
-      className="w-full mt-1.5 border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50" />
+      className={`w-full mt-1.5 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" : "bg-gray-50 border-gray-200 text-gray-900"}`} />
   );
 }
 
@@ -49,6 +53,7 @@ function TextInput({ value, onChange, placeholder, name }) {
 // ChatPage
 // ============================================================
 export function ChatPage() {
+  const { darkMode } = useTheme();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [subject, setSubject] = useState("Data Structures");
@@ -56,7 +61,6 @@ export function ChatPage() {
  
   const bottomRef = useRef(null);
   
-
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   // Load existing chat from Firestore
@@ -90,7 +94,7 @@ export function ChatPage() {
       const data = await askQuestion(input, subject, messages);
       setMessages([...newMessages, { role: "assistant", content: data.answer }]);
     } catch {
-      setMessages([...newMessages, { role: "assistant", content: " Unable to get a response. This may be due to API rate limits. Please wait a moment and try again." }]);
+      setMessages([...newMessages, { role: "assistant", content: "Unable to get a response. This may be due to API rate limits. Please wait a moment and try again." }]);
     }
     setLoading(false);
   };
@@ -100,28 +104,28 @@ export function ChatPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-gray-100 bg-white">
+      <div className={`flex items-center justify-between px-4 md:px-6 py-4 border-b ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
         <div>
-          <h1 className="text-lg font-bold text-gray-900">Ask AI Tutor</h1>
-          <p className="text-xs text-gray-400 mt-0.5">Powered by Gemini AI</p>
+          <h1 className={`text-lg font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>Ask AI Tutor</h1>
+          <p className={`text-xs mt-0.5 ${darkMode ? "text-gray-400" : "text-gray-400"}`}>Powered by Gemini AI</p>
         </div>
         <select value={subject} onChange={(e) => setSubject(e.target.value)}
-          className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 max-w-[160px]">
+          className={`border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[160px] ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-gray-50 border-gray-200 text-gray-900"}`}>
           {SUBJECTS.map(s => <option key={s}>{s}</option>)}
         </select>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-4">
+      <div className={`flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-4 ${darkMode ? "bg-gray-900" : "bg-gray-50"}`}>
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center py-16">
-            <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${darkMode ? "bg-blue-900/30" : "bg-blue-50"}`}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
-            <h3 className="font-semibold text-gray-700 mb-1">Ask any BSCS question</h3>
-            <p className="text-sm text-gray-400 max-w-xs">Get detailed explanations, code examples, and step-by-step solutions</p>
+            <h3 className={`font-semibold mb-1 ${darkMode ? "text-white" : "text-gray-700"}`}>Ask any BSCS question</h3>
+            <p className={`text-sm max-w-xs ${darkMode ? "text-gray-400" : "text-gray-400"}`}>Get detailed explanations, code examples, and step-by-step solutions</p>
           </div>
         )}
         {messages.map((msg, i) => (
@@ -132,26 +136,25 @@ export function ChatPage() {
               </div>
             )}
             <div className={`max-w-[80%] md:max-w-[70%] rounded-2xl px-4 py-3 text-sm leading-relaxed relative group ${
-  msg.role === "user"
-    ? "bg-blue-600 text-white rounded-br-sm"
-    : "bg-white border border-gray-200 text-gray-800 rounded-bl-sm shadow-sm"
-}`}>
-  {msg.role === "assistant" ? (
-    <>
-      <ReactMarkdown className="prose prose-sm max-w-none">{msg.content}</ReactMarkdown>
-      <button
-        onClick={() => navigator.clipboard.writeText(msg.content)}
-        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-500"
-        title="Copy"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-        </svg>
-      </button>
-    </>
-  ) : msg.content}
-</div>
-
+              msg.role === "user"
+                ? "bg-blue-600 text-white rounded-br-sm"
+                : `${darkMode ? "bg-gray-800 border-gray-700 text-gray-100" : "bg-white border border-gray-200 text-gray-800"} rounded-bl-sm shadow-sm`
+            }`}>
+              {msg.role === "assistant" ? (
+                <>
+                  <ReactMarkdown className={`prose prose-sm max-w-none ${darkMode ? "prose-invert" : ""}`}>{msg.content}</ReactMarkdown>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(msg.content)}
+                    className={`absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded ${darkMode ? "bg-gray-700 hover:bg-gray-600 text-gray-300" : "bg-gray-100 hover:bg-gray-200 text-gray-500"}`}
+                    title="Copy"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                </>
+              ) : msg.content}
+            </div>
           </div>
         ))}
         {loading && (
@@ -159,11 +162,11 @@ export function ChatPage() {
             <div className="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
               <span className="text-white text-xs font-bold">AI</span>
             </div>
-            <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
+            <div className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm`}>
               <div className="flex space-x-1 items-center h-4">
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{animationDelay:"0ms"}}></div>
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{animationDelay:"150ms"}}></div>
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{animationDelay:"300ms"}}></div>
+                <div className={`w-1.5 h-1.5 rounded-full animate-bounce ${darkMode ? "bg-gray-500" : "bg-gray-400"}`} style={{animationDelay:"0ms"}}></div>
+                <div className={`w-1.5 h-1.5 rounded-full animate-bounce ${darkMode ? "bg-gray-500" : "bg-gray-400"}`} style={{animationDelay:"150ms"}}></div>
+                <div className={`w-1.5 h-1.5 rounded-full animate-bounce ${darkMode ? "bg-gray-500" : "bg-gray-400"}`} style={{animationDelay:"300ms"}}></div>
               </div>
             </div>
           </div>
@@ -172,12 +175,12 @@ export function ChatPage() {
       </div>
 
       {/* Input */}
-      <div className="px-4 md:px-6 py-4 border-t border-gray-100 bg-white sticky bottom-0">
+      <div className={`px-4 md:px-6 py-4 border-t sticky bottom-0 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
         <div className="flex gap-2 items-end">
           <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown}
             placeholder="Type your question... (Enter to send)"
             rows={2}
-            className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50" />
+            className={`flex-1 border rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" : "bg-gray-50 border-gray-200 text-gray-900"}`} />
           <button onClick={sendMessage} disabled={loading || !input.trim()}
             className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl disabled:opacity-50 transition-colors flex-shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -194,6 +197,7 @@ export function ChatPage() {
 // QuizPage
 // ============================================================
 export function QuizPage() {
+  const { darkMode } = useTheme();
   const [topic, setTopic] = useState("");
   const [subject, setSubject] = useState("Data Structures");
   const [count, setCount] = useState(10);
@@ -225,11 +229,11 @@ export function QuizPage() {
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Quiz Generator</h1>
-        <p className="text-gray-500 text-sm mt-1">Test your knowledge with AI-generated questions</p>
+        <h1 className={`text-xl md:text-2xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>Quiz Generator</h1>
+        <p className={`text-sm mt-1 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>Test your knowledge with AI-generated questions</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6 space-y-4">
+      <div className={`rounded-xl border p-5 mb-6 space-y-4 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <Label>Subject</Label>
@@ -266,62 +270,64 @@ export function QuizPage() {
       </div>
 
       {questions.length === 0 && !loading && topic && (
-  <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-    <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-      </svg>
-    </div>
-    <p className="text-gray-500 text-sm">No questions generated. Please try again.</p>
-  </div>
-)}
-        <div className="space-y-3">
-          {questions.map((q, i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 md:p-5">
-              <p className="font-medium text-gray-900 mb-3 text-sm">
-                <span className="text-blue-600 font-bold mr-2">Q{i+1}.</span>{q.question}
-              </p>
-              {q.options && (
-                <div className="space-y-2">
-                  {q.options.map((opt, j) => (
-                    <label key={j} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer border text-sm transition-all ${
-                      answers[i] === opt.charAt(0)
-                        ? "bg-blue-50 border-blue-400 text-blue-800"
-                        : "border-gray-200 hover:bg-gray-50 text-gray-700"
-                    }`}>
-                      <input type="radio" name={`q${i}`} value={opt.charAt(0)}
-                        onChange={() => setAnswers({ ...answers, [i]: opt.charAt(0) })}
-                        className="text-blue-600 flex-shrink-0" />
-                      <span>{opt}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-              {score !== null && (
-                <div className={`mt-3 p-3 rounded-lg text-sm border ${
-                  answers[i] === q.correct
-                    ? "bg-green-50 border-green-200 text-green-700"
-                    : "bg-red-50 border-red-200 text-red-700"
-                }`}>
-                  <span className="font-semibold">{answers[i] === q.correct ? "Correct!" : `Wrong. Answer: ${q.correct}`}</span>
-                  {q.explanation && <span className="ml-1 opacity-80">{q.explanation}</span>}
-                </div>
-              )}
-            </div>
-          ))}
+        <div className={`text-center py-12 rounded-xl border ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 ${darkMode ? "bg-gray-700" : "bg-gray-100"}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${darkMode ? "text-gray-400" : "text-gray-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>No questions generated. Please try again.</p>
+        </div>
+      )}
+      
+      <div className="space-y-3">
+        {questions.map((q, i) => (
+          <div key={i} className={`rounded-xl border p-4 md:p-5 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+            <p className={`font-medium mb-3 text-sm ${darkMode ? "text-white" : "text-gray-900"}`}>
+              <span className="text-blue-600 font-bold mr-2">Q{i+1}.</span>{q.question}
+            </p>
+            {q.options && (
+              <div className="space-y-2">
+                {q.options.map((opt, j) => (
+                  <label key={j} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer border text-sm transition-all ${
+                    answers[i] === opt.charAt(0)
+                      ? (darkMode ? "bg-blue-900/30 border-blue-500 text-blue-300" : "bg-blue-50 border-blue-400 text-blue-800")
+                      : (darkMode ? "border-gray-600 hover:bg-gray-700 text-gray-300" : "border-gray-200 hover:bg-gray-50 text-gray-700")
+                  }`}>
+                    <input type="radio" name={`q${i}`} value={opt.charAt(0)}
+                      onChange={() => setAnswers({ ...answers, [i]: opt.charAt(0) })}
+                      className="text-blue-600 flex-shrink-0" />
+                    <span>{opt}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+            {score !== null && (
+              <div className={`mt-3 p-3 rounded-lg text-sm border ${
+                answers[i] === q.correct
+                  ? (darkMode ? "bg-green-900/20 border-green-800 text-green-400" : "bg-green-50 border-green-200 text-green-700")
+                  : (darkMode ? "bg-red-900/20 border-red-800 text-red-400" : "bg-red-50 border-red-200 text-red-700")
+              }`}>
+                <span className="font-semibold">{answers[i] === q.correct ? "Correct!" : `Wrong. Answer: ${q.correct}`}</span>
+                {q.explanation && <span className="ml-1 opacity-80">{q.explanation}</span>}
+              </div>
+            )}
+          </div>
+        ))}
 
-          {score === null ? (
+        {questions.length > 0 && (
+          score === null ? (
             <button onClick={handleSubmit}
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl text-sm transition-colors">
               Submit Quiz
             </button>
           ) : (
-            <div className="bg-white border border-gray-200 rounded-xl p-6 text-center">
+            <div className={`border rounded-xl p-6 text-center ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
               <div className="w-20 h-20 rounded-full border-4 border-blue-200 flex items-center justify-center mx-auto mb-3">
                 <span className="text-2xl font-bold text-blue-600">{scorePercent}%</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900">{score} / {questions.length}</p>
-              <p className="text-gray-500 text-sm mt-1">
+              <p className={`text-2xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>{score} / {questions.length}</p>
+              <p className={`text-sm mt-1 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
                 {score === questions.length ? "Perfect score!" : score >= questions.length * 0.7 ? "Great job!" : "Keep practicing!"}
               </p>
               <button onClick={() => { setScore(null); setQuestions([]); setAnswers({}); setTopic(""); }}
@@ -329,9 +335,9 @@ export function QuizPage() {
                 Try Again
               </button>
             </div>
-          )}
-        </div>
-      
+          )
+        )}
+      </div>
     </div>
   );
 }
@@ -340,6 +346,7 @@ export function QuizPage() {
 // AssignmentPage
 // ============================================================
 export function AssignmentPage() {
+  const { darkMode } = useTheme();
   const [form, setForm] = useState({ subject: "DBMS", topic: "", type: "theory", requirements: "" });
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(false);
@@ -363,13 +370,13 @@ export function AssignmentPage() {
   return (
     <div className="p-4 md:p-6">
       <div className="mb-6">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Assignment Generator</h1>
-        <p className="text-gray-500 text-sm mt-1">Generate professional assignment drafts with AI</p>
+        <h1 className={`text-xl md:text-2xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>Assignment Generator</h1>
+        <p className={`text-sm mt-1 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>Generate professional assignment drafts with AI</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Form */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+        <div className={`rounded-xl border p-5 space-y-4 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
           <div>
             <Label>Subject</Label>
             <SelectInput name="subject" value={form.subject} onChange={handleChange}>
@@ -392,7 +399,7 @@ export function AssignmentPage() {
             <Label>Requirements (optional)</Label>
             <textarea name="requirements" value={form.requirements} onChange={handleChange}
               placeholder="e.g. Cover 1NF, 2NF, 3NF. Minimum 400 words..." rows={4}
-              className="w-full mt-1.5 border border-gray-200 rounded-lg px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50" />
+              className={`w-full mt-1.5 border rounded-lg px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" : "bg-gray-50 border-gray-200 text-gray-900"}`} />
           </div>
           {error && <ErrorBox message={error} />}
           <button onClick={handleGenerate} disabled={loading}
@@ -402,12 +409,12 @@ export function AssignmentPage() {
         </div>
 
         {/* Output */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col min-h-64">
+        <div className={`rounded-xl border p-5 flex flex-col min-h-64 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-800 text-sm">Generated Draft</h2>
+            <h2 className={`font-semibold text-sm ${darkMode ? "text-gray-200" : "text-gray-800"}`}>Generated Draft</h2>
             {draft && (
               <button onClick={handleCopy}
-                className="flex items-center gap-1.5 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition-colors font-medium">
+                className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-colors font-medium ${darkMode ? "bg-gray-700 hover:bg-gray-600 text-gray-300" : "bg-gray-100 hover:bg-gray-200 text-gray-700"}`}>
                 {copied ? (
                   <><svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>Copied</>
                 ) : (
@@ -419,27 +426,27 @@ export function AssignmentPage() {
 
           {!draft && !loading && (
             <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
-              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${darkMode ? "bg-gray-700" : "bg-gray-100"}`}>
+                <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${darkMode ? "text-gray-500" : "text-gray-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
               </div>
-              <p className="text-gray-400 text-sm">Your draft will appear here</p>
+              <p className={`text-sm ${darkMode ? "text-gray-500" : "text-gray-400"}`}>Your draft will appear here</p>
             </div>
           )}
           {loading && (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                <p className="text-sm text-gray-500">Generating your assignment...</p>
+                <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>Generating your assignment...</p>
               </div>
             </div>
           )}
           {draft && (
             <>
-              <div className="flex-1 overflow-y-auto text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{draft}</div>
-              <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-3">
-                <p className="text-xs text-amber-700"><strong>Note:</strong> This is an AI-generated draft. Review and personalize before submission.</p>
+              <div className={`flex-1 overflow-y-auto text-sm whitespace-pre-wrap leading-relaxed ${darkMode ? "text-gray-300" : "text-gray-700"}`}>{draft}</div>
+              <div className={`mt-4 border rounded-lg p-3 ${darkMode ? "bg-amber-900/20 border-amber-800" : "bg-amber-50 border-amber-200"}`}>
+                <p className={`text-xs ${darkMode ? "text-amber-400" : "text-amber-700"}`}><strong>Note:</strong> This is an AI-generated draft. Review and personalize before submission.</p>
               </div>
             </>
           )}
@@ -453,6 +460,7 @@ export function AssignmentPage() {
 // PastPaperPage
 // ============================================================
 export function PastPaperPage() {
+  const { darkMode } = useTheme();
   const [file, setFile] = useState(null);
   const [subject, setSubject] = useState("DBMS");
   const [results, setResults] = useState(null);
@@ -486,11 +494,11 @@ export function PastPaperPage() {
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Past Paper Analyzer</h1>
-        <p className="text-gray-500 text-sm mt-1">Upload a VU past paper and get AI-generated answers</p>
+        <h1 className={`text-xl md:text-2xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>Past Paper Analyzer</h1>
+        <p className={`text-sm mt-1 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>Upload a VU past paper and get AI-generated answers</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4 mb-4">
+      <div className={`rounded-xl border p-5 space-y-4 mb-4 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
         <div>
           <Label>Subject</Label>
           <SelectInput value={subject} onChange={(e) => setSubject(e.target.value)}>
@@ -505,22 +513,26 @@ export function PastPaperPage() {
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             className={`mt-1.5 border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${
-              dragOver ? "border-blue-400 bg-blue-50" : file ? "border-green-400 bg-green-50" : "border-gray-200 hover:border-gray-300"
+              dragOver 
+                ? (darkMode ? "border-blue-500 bg-blue-900/20" : "border-blue-400 bg-blue-50") 
+                : file 
+                  ? (darkMode ? "border-green-500 bg-green-900/20" : "border-green-400 bg-green-50") 
+                  : (darkMode ? "border-gray-600 hover:border-gray-500" : "border-gray-200 hover:border-gray-300")
             }`}
           >
             <input type="file" accept=".pdf" onChange={(e) => handleFileChange(e.target.files[0])} className="hidden" id="pdf-upload" />
             <label htmlFor="pdf-upload" className="cursor-pointer block">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 ${file ? "bg-green-100" : "bg-gray-100"}`}>
-                <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${file ? "text-green-600" : "text-gray-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 ${file ? (darkMode ? "bg-green-900/40" : "bg-green-100") : (darkMode ? "bg-gray-700" : "bg-gray-100")}`}>
+                <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${file ? "text-green-500" : (darkMode ? "text-gray-400" : "text-gray-400")}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
               {file ? (
-                <p className="text-sm font-medium text-green-700">{file.name}</p>
+                <p className={`text-sm font-medium ${darkMode ? "text-green-400" : "text-green-700"}`}>{file.name}</p>
               ) : (
                 <>
-                  <p className="text-sm font-medium text-gray-600">Drop PDF here or click to browse</p>
-                  <p className="text-xs text-gray-400 mt-1">Maximum size: 10MB</p>
+                  <p className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"}`}>Drop PDF here or click to browse</p>
+                  <p className={`text-xs mt-1 ${darkMode ? "text-gray-500" : "text-gray-400"}`}>Maximum size: 10MB</p>
                 </>
               )}
             </label>
@@ -536,21 +548,21 @@ export function PastPaperPage() {
 
       {results && (
         <div className="space-y-3">
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-3">
+          <div className={`border rounded-xl p-4 flex items-center gap-3 ${darkMode ? "bg-blue-900/20 border-blue-800" : "bg-blue-50 border-blue-200"}`}>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-blue-700 text-sm font-medium">Found {results.total_questions} questions in {results.subject}</p>
+            <p className={`text-sm font-medium ${darkMode ? "text-blue-400" : "text-blue-700"}`}>Found {results.total_questions} questions in {results.subject}</p>
           </div>
           {results.results?.map((item, i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 md:p-5">
+            <div key={i} className={`rounded-xl border p-4 md:p-5 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
               <div className="mb-3">
-                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">Q{item.number}</span>
-                <p className="text-sm font-medium text-gray-800 mt-2">{item.question}</p>
+                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${darkMode ? "text-blue-300 bg-blue-900/40" : "text-blue-600 bg-blue-50"}`}>Q{item.number}</span>
+                <p className={`text-sm font-medium mt-2 ${darkMode ? "text-white" : "text-gray-800"}`}>{item.question}</p>
               </div>
-              <div className="border-t border-gray-100 pt-3">
-                <p className="text-xs font-semibold text-emerald-600 mb-2 uppercase tracking-wide">Answer</p>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{item.answer}</p>
+              <div className={`border-t pt-3 ${darkMode ? "border-gray-700" : "border-gray-100"}`}>
+                <p className={`text-xs font-semibold mb-2 uppercase tracking-wide ${darkMode ? "text-emerald-400" : "text-emerald-600"}`}>Answer</p>
+                <p className={`text-sm whitespace-pre-wrap leading-relaxed ${darkMode ? "text-gray-300" : "text-gray-700"}`}>{item.answer}</p>
               </div>
             </div>
           ))}
@@ -564,6 +576,7 @@ export function PastPaperPage() {
 // SimplifierPage
 // ============================================================
 export function SimplifierPage() {
+  const { darkMode } = useTheme();
   const [text, setText] = useState("");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
@@ -582,26 +595,26 @@ export function SimplifierPage() {
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Concept Simplifier</h1>
-        <p className="text-gray-500 text-sm mt-1">Paste complex text and get a plain-language explanation</p>
+        <h1 className={`text-xl md:text-2xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>Concept Simplifier</h1>
+        <p className={`text-sm mt-1 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>Paste complex text and get a plain-language explanation</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4 mb-4">
+      <div className={`rounded-xl border p-5 space-y-4 mb-4 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
         <div>
           <Label>Handout Text</Label>
           <textarea value={text} onChange={(e) => setText(e.target.value)}
             placeholder="Paste complex text from your handout here..."
             rows={7}
-            className="w-full mt-1.5 border border-gray-200 rounded-lg px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50" />
-          <p className="text-xs text-gray-400 mt-1 text-right">{text.length} / 2000 characters</p>
+            className={`w-full mt-1.5 border rounded-lg px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" : "bg-gray-50 border-gray-200 text-gray-900"}`} />
+          <p className={`text-xs mt-1 text-right ${darkMode ? "text-gray-500" : "text-gray-400"}`}>{text.length} / 2000 characters</p>
         </div>
 
         <label className="flex items-center gap-2.5 cursor-pointer select-none">
-          <div className={`w-10 h-5 rounded-full transition-colors relative ${inUrdu ? "bg-blue-600" : "bg-gray-200"}`}
+          <div className={`w-10 h-5 rounded-full transition-colors relative ${inUrdu ? "bg-blue-600" : (darkMode ? "bg-gray-600" : "bg-gray-200")}`}
             onClick={() => setInUrdu(!inUrdu)}>
             <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-all shadow-sm ${inUrdu ? "right-0.5" : "left-0.5"}`} />
           </div>
-          <span className="text-sm text-gray-600 font-medium">Explain in Urdu</span>
+          <span className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"}`}>Explain in Urdu</span>
         </label>
 
         <button onClick={handleSimplify} disabled={loading || !text.trim()}
@@ -611,16 +624,16 @@ export function SimplifierPage() {
       </div>
 
       {result && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className={`rounded-xl border p-5 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-5 h-5 bg-green-100 rounded flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className={`w-5 h-5 rounded flex items-center justify-center ${darkMode ? "bg-green-900/40" : "bg-green-100"}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" className={`h-3 w-3 ${darkMode ? "text-green-400" : "text-green-600"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="font-semibold text-gray-800 text-sm">Simplified Explanation</h2>
+            <h2 className={`font-semibold text-sm ${darkMode ? "text-gray-200" : "text-gray-800"}`}>Simplified Explanation</h2>
           </div>
-          <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{result}</p>
+          <p className={`text-sm whitespace-pre-wrap leading-relaxed ${darkMode ? "text-gray-300" : "text-gray-700"}`}>{result}</p>
         </div>
       )}
     </div>
@@ -631,6 +644,7 @@ export function SimplifierPage() {
 // PlannerPage
 // ============================================================
 export function PlannerPage() {
+  const { darkMode } = useTheme();
   const [deadlines, setDeadlines] = useState([]);
   const [newDeadline, setNewDeadline] = useState({ subject: "DBMS", title: "", due_date: "" });
   const [hours, setHours] = useState({ mon: 2, tue: 2, wed: 1, thu: 2, fri: 1, sat: 3, sun: 3 });
@@ -661,21 +675,21 @@ export function PlannerPage() {
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Study Planner</h1>
-        <p className="text-gray-500 text-sm mt-1">Add deadlines and get a personalized weekly study plan</p>
+        <h1 className={`text-xl md:text-2xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>Study Planner</h1>
+        <p className={`text-sm mt-1 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>Add deadlines and get a personalized weekly study plan</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         {/* Add Deadline */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="font-semibold text-gray-800 text-sm mb-4">Add Deadline</h2>
+        <div className={`rounded-xl border p-5 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+          <h2 className={`font-semibold text-sm mb-4 ${darkMode ? "text-gray-200" : "text-gray-800"}`}>Add Deadline</h2>
           <div className="space-y-3">
             <SelectInput value={newDeadline.subject} onChange={(e) => setNewDeadline({...newDeadline, subject: e.target.value})}>
               {SUBJECTS.map(s => <option key={s}>{s}</option>)}
             </SelectInput>
             <TextInput value={newDeadline.title} onChange={(e) => setNewDeadline({...newDeadline, title: e.target.value})} placeholder="Assignment title..." />
             <input type="date" value={newDeadline.due_date} onChange={(e) => setNewDeadline({...newDeadline, due_date: e.target.value})}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50" />
+              className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? "bg-gray-700 border-gray-600 text-white color-scheme-dark" : "bg-gray-50 border-gray-200 text-gray-900"}`} />
             <button onClick={addDeadline}
               className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm hover:bg-blue-700 transition-colors font-medium">
               Add Deadline
@@ -684,14 +698,14 @@ export function PlannerPage() {
 
           {deadlines.length > 0 && (
             <div className="mt-4 space-y-2">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Added Deadlines</p>
+              <p className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? "text-gray-400" : "text-gray-500"}`}>Added Deadlines</p>
               {deadlines.map((d, i) => (
-                <div key={i} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2.5">
+                <div key={i} className={`flex items-center justify-between rounded-lg px-3 py-2.5 ${darkMode ? "bg-gray-700" : "bg-gray-50"}`}>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-700 truncate">{d.title}</p>
-                    <p className="text-xs text-gray-400">{d.subject} — {d.due_date}</p>
+                    <p className={`text-sm font-medium truncate ${darkMode ? "text-gray-200" : "text-gray-700"}`}>{d.title}</p>
+                    <p className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-400"}`}>{d.subject} — {d.due_date}</p>
                   </div>
-                  <button onClick={() => removeDeadline(i)} className="ml-2 text-gray-300 hover:text-red-500 transition-colors flex-shrink-0">
+                  <button onClick={() => removeDeadline(i)} className={`ml-2 transition-colors flex-shrink-0 ${darkMode ? "text-gray-400 hover:text-red-400" : "text-gray-300 hover:text-red-500"}`}>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -703,16 +717,16 @@ export function PlannerPage() {
         </div>
 
         {/* Hours */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="font-semibold text-gray-800 text-sm mb-4">Available Hours Per Day</h2>
+        <div className={`rounded-xl border p-5 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+          <h2 className={`font-semibold text-sm mb-4 ${darkMode ? "text-gray-200" : "text-gray-800"}`}>Available Hours Per Day</h2>
           <div className="space-y-3">
             {DAYS.map((day, i) => (
               <div key={day} className="flex items-center gap-3">
-                <span className="text-xs font-semibold text-gray-500 w-7">{DAY_LABELS[i]}</span>
+                <span className={`text-xs font-semibold w-7 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>{DAY_LABELS[i]}</span>
                 <input type="range" min="0" max="8" value={hours[day]}
                   onChange={(e) => setHours({...hours, [day]: Number(e.target.value)})}
                   className="flex-1 accent-blue-600" />
-                <span className="text-sm font-bold text-blue-600 w-8 text-right">{hours[day]}h</span>
+                <span className={`text-sm font-bold w-8 text-right ${darkMode ? "text-blue-400" : "text-blue-600"}`}>{hours[day]}h</span>
               </div>
             ))}
           </div>
@@ -725,21 +739,21 @@ export function PlannerPage() {
       </button>
 
       {plan && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="font-semibold text-gray-800 text-sm mb-1">Your Weekly Plan</h2>
-          <p className="text-sm text-gray-500 mb-4">{plan.week_summary}</p>
+        <div className={`rounded-xl border p-5 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+          <h2 className={`font-semibold text-sm mb-1 ${darkMode ? "text-gray-200" : "text-gray-800"}`}>Your Weekly Plan</h2>
+          <p className={`text-sm mb-4 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>{plan.week_summary}</p>
           <div className="space-y-3">
             {plan.daily_plan?.map((day, i) => (
-              <div key={i} className="border border-gray-100 rounded-xl p-4">
+              <div key={i} className={`border rounded-xl p-4 ${darkMode ? "border-gray-700" : "border-gray-100"}`}>
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-gray-800 text-sm">{day.day}</h3>
-                  <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full">{day.available_hours}h available</span>
+                  <h3 className={`font-semibold text-sm ${darkMode ? "text-gray-200" : "text-gray-800"}`}>{day.day}</h3>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${darkMode ? "text-blue-300 bg-blue-900/40" : "text-blue-600 bg-blue-50"}`}>{day.available_hours}h available</span>
                 </div>
                 <div className="space-y-1.5">
                   {day.tasks?.map((task, j) => (
-                    <div key={j} className="flex items-start gap-2 text-sm text-gray-600">
+                    <div key={j} className={`flex items-start gap-2 text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
                       <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-1.5 flex-shrink-0"></span>
-                      <span><strong className="text-gray-700">{task.subject}:</strong> {task.task} <span className="text-gray-400">({task.duration})</span></span>
+                      <span><strong className={darkMode ? "text-gray-300" : "text-gray-700"}>{task.subject}:</strong> {task.task} <span className={darkMode ? "text-gray-500" : "text-gray-400"}>({task.duration})</span></span>
                     </div>
                   ))}
                 </div>
@@ -747,8 +761,8 @@ export function PlannerPage() {
             ))}
           </div>
           {plan.priority_warning && (
-            <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-3">
-              <p className="text-xs text-amber-700">{plan.priority_warning}</p>
+            <div className={`mt-3 border rounded-lg p-3 ${darkMode ? "bg-amber-900/20 border-amber-800" : "bg-amber-50 border-amber-200"}`}>
+              <p className={`text-xs ${darkMode ? "text-amber-400" : "text-amber-700"}`}>{plan.priority_warning}</p>
             </div>
           )}
         </div>
