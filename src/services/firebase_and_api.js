@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 import axios from "axios";
 
 const firebaseConfig = {
