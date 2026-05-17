@@ -28,8 +28,7 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-// Chat session management
-let currentChatId = null;
+
 
 // CORRECTED askQuestion: Sends text + file to your Railway Backend
 export async function askQuestion(text, subject, chatHistory, file = null) {
@@ -58,7 +57,7 @@ export async function askQuestion(text, subject, chatHistory, file = null) {
   }
 }
 
-export const resetChatSession = () => { currentChatId = null; };
+export const resetChatSession = () => {};
 
 export const analyzePastPaper = async (file, subject) => {
   const formData = new FormData();
