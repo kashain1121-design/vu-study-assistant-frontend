@@ -52,12 +52,19 @@ function TextInput({ value, onChange, placeholder, name }) {
 // ============================================================
 // ChatPage
 // ============================================================
+// ============================================================
+// ChatPage
+// ============================================================
 export function ChatPage() {
   const { darkMode } = useTheme();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [subject, setSubject] = useState("Data Structures");
   const [loading, setLoading] = useState(false);
+  
+  // NEW: State and Ref for File Upload
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
  
   const bottomRef = useRef(null);
   
@@ -84,14 +91,37 @@ export function ChatPage() {
     };
     load();
   }, []);
+
+  // NEW: Handle File Selection
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
       
   const sendMessage = async () => {
-    if (!input.trim() || loading) return;
-    const userMessage = { role: "user", content: input };
+    if ((!input.trim() && !selectedFile) || loading) return;
+    
+    // Prepare message content (showing file name if attached)
+    let displayContent = input;
+    if (selectedFile) {
+      displayContent = `[Attached File: ${selectedFile.name}]\n${input}`;
+    }
+
+    const userMessage = { role: "user", content: displayContent };
     const newMessages = [...messages, userMessage];
-    setMessages(newMessages); setInput(""); setLoading(true);
+    
+    setMessages(newMessages); 
+    setInput(""); 
+    setLoading(true);
+    
+    // Save file reference locally before clearing state
+    const fileToSend = selectedFile; 
+    setSelectedFile(null); // Clear attachment UI immediately
+
     try {
-      const data = await askQuestion(input, subject, messages);
+      // NOTE: You will need to update your askQuestion API to accept and process 'fileToSend'
+      const data = await askQuestion(input, subject, messages, fileToSend);
       setMessages([...newMessages, { role: "assistant", content: data.answer }]);
     } catch {
       setMessages([...newMessages, { role: "assistant", content: "Unable to get a response. This may be due to API rate limits. Please wait a moment and try again." }]);
@@ -104,7 +134,7 @@ export function ChatPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className={`flex items-center justify-between px-4 md:px-6 py-4 border-b ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
+      <div className={`flex items-center justify-between px-4 md:px-6 py-4 border-b z-10 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
         <div>
           <h1 className={`text-lg font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>Ask AI Tutor</h1>
           <p className={`text-xs mt-0.5 ${darkMode ? "text-gray-400" : "text-gray-400"}`}>Powered by Gemini AI</p>
@@ -153,7 +183,9 @@ export function ChatPage() {
                     </svg>
                   </button>
                 </>
-              ) : msg.content}
+              ) : (
+                <span className="whitespace-pre-wrap">{msg.content}</span>
+              )}
             </div>
           </div>
         ))}
@@ -174,14 +206,55 @@ export function ChatPage() {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
-      <div className={`px-4 md:px-6 py-4 border-t sticky bottom-0 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
+      {/* Input Area */}
+      <div className={`px-4 md:px-6 py-4 border-t sticky bottom-0 z-10 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
+        
+        {/* Attachment Preview Chip */}
+        {selectedFile && (
+          <div className="mb-3 flex items-center">
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${darkMode ? "bg-gray-700 border-gray-600 text-gray-200" : "bg-blue-50 border-blue-100 text-blue-800"}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+              </svg>
+              <span className="text-xs font-medium max-w-[200px] truncate">{selectedFile.name}</span>
+              <button onClick={() => setSelectedFile(null)} className={`ml-1 hover:text-red-500 transition-colors ${darkMode ? "text-gray-400" : "text-blue-400"}`}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-2 items-end">
+          {/* Hidden File Input */}
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileChange} 
+            className="hidden" 
+            accept=".pdf,image/*,.txt,.doc,.docx" 
+          />
+
+          {/* Plus / Attachment Button */}
+          <button 
+            onClick={() => fileInputRef.current?.click()}
+            className={`p-3 rounded-xl transition-colors flex-shrink-0 border border-transparent ${darkMode ? "text-gray-400 hover:bg-gray-700 hover:text-gray-200" : "text-gray-500 hover:bg-gray-100 hover:text-gray-800"}`}
+            title="Attach file or image"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+
+          {/* Text Area */}
           <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown}
-            placeholder="Type your question... (Enter to send)"
-            rows={2}
+            placeholder="Ask a question or attach a file..."
+            rows={selectedFile ? 1 : 2}
             className={`flex-1 border rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" : "bg-gray-50 border-gray-200 text-gray-900"}`} />
-          <button onClick={sendMessage} disabled={loading || !input.trim()}
+          
+          {/* Send Button */}
+          <button onClick={sendMessage} disabled={loading || (!input.trim() && !selectedFile)}
             className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl disabled:opacity-50 transition-colors flex-shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
